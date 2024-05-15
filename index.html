@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>DALL-E Image Generator</title>
+        <style>
+         :root {
+            --sidebar-width: 180px;
+            --header-height: 8rem;
+            --header-height-small: 53px;
+            --control-bar-height: 29px;
+            --control-bar-space-between: 1.5rem;
+            --font-family: "Lato", "Lucida Grande", "Lucida Sans Unicode", Tahoma, Sans-Serif;
+            --font-family-header: "Telefon Black", Sans-Serif;
+            --font-family-header-alt: "Telefon", Sans-Serif;
+            --font-family-monospace: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+            --font-family-editor: var(--color-font-family-monospace);
+            --color-primary: #ededed;
+            --color-secondary: #222546;
+            --color-primary-button: #29658a;
+            --color-secondary-button: #474866;
+            --color-primary: #343434;
+            --color-tertiary: #3e3e3e;
+            --color-quaternary: #282828;
+            --color-quinary: #2e2e2e;
+            --color-quaternary-alt: #4a4a4a;
+            --color-quinary-alt: #242b44;
+            --color-quaternary-highlight: #453979;
+            --color-quinary-highlight: #242b44;
+            --button-border-width: 3px;
+            --button-border-radius: 4px;
+            --button-margin-block: 1px;
+            --button-margin-inline: 10px;
+            --button-padding-inline: 16px;
+            --button-padding-block: 10px;
+            --color-pen-radius: 5px;
+            --logo-size: 30px;
+            --header-spacing: calc(var(--color-pen-sidebar-spacing) * 1.5);
+            --sidebar-width: 60px;
+            --sidebar-icon-size: 26px;
+            --sidebar-spacing: 6px;
+            --sidebar-minimal-width: 6px;
+            --panel-spacing: 10px;
+            --bar-height: 45px;
+            --grid-rows: 2;
+            --grid-cols: 2;
+            --image-height: 300px;
+            --image-width: 300px;
+            --slider-width: 6px;
+        }
+        
+        * {
+            -webkit-box-sizing: border-box;
+            box-sizing: border-box;
+        }
+        
+        body,
+        html {
+            margin: 0 !important;
+            padding: 0 !important;
+            max-height: 100vh;
+            max-width: 100vw;
+            height: 100%;
+            min-height: 95vh;
+            min-width: 95vw;
+        }
+        
+        body {
+            color: white;
+            font-family: var(--font-family);
+            font-size: 10px;
+            background-color: var(--color-quaternary);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            display: flex;
+            justify-content: center;
+            max-height: 100vh;
+            max-width: 100vw;
+            height: 100%;
+            width: 100%;
+            min-height: 100vh;
+            min-width: 100vw;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .container {
+            /* max-width: 100%; */
+            max-height: 90vh;
+            height: 100%;
+            width: 100vw;
+            max-width: 100vw;
+            margin: 10px !important;
+            padding: 0 !important;
+            box-shadow: black 0px 0px 10px -2px;
+            /* box-shadow: 1px 1px 2px 0px #000000 inset; */
+            object-fit: cover;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            flex-direction: row;
+            height: 100%;
+            background-color: var(--color-quinary);
+        }
+        
+        .header {
+            border: 0 solid var(--color-quinary);
+            background-color: var(--color-quaternary);
+            display: flex;
+            overflow: auto;
+            min-width: 200px;
+            max-width: var(--header-height);
+            flex-direction: column;
+            justify-content: center;
+            flex-grow: 1;
+            padding: 4px;
+            align-items: center;
+        }
+
+        .content {
+            border: 0 solid var(--color-quinary);
+            background-color: var(--color-tertiary);
+            display: flex;
+            flex: auto;
+            height: 100%;
+            max-height: 100%;
+            min-height: auto;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            overflow: hidden;
+            padding: 4px;
+            margin: 0px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+            }
+
+            .header {
+                width: 100%;
+                height: 100%;
+                width: auto;
+                min-width: 200px;
+                max-width: var(--header-height);
+                display: flex;
+                justify-content: center;
+                flex-wrap: nowrap;
+                flex-direction: column;
+                align-items: center;
+            }
+    
+        }
+          
+        @media (max-width: 480px) {
+            .container {
+                flex-direction: column;
+            }
+            .header {
+                flex-direction: row;
+                flex-wrap: nowrap;
+                width: 100%;
+                min-width: 100%;
+                max-width: 100%;
+                height: var(--header-height);
+                max-height: var(--header-height);
+                align-items: normal;
+            }
+            .header .input-group {
+                flex-direction: column;
+                flex-wrap: nowrap;
+            }
+    
+            .header .input-fields {
+                flex-direction: column;
+                flex-wrap: nowrap;
+            }
+            
+            .header .input-field {
+            }
+            
+            .header .input-fields label {
+            }
+            
+            .input-fields input {
+                margin: 0px;
+                padding: 0.5rem;
+            }
+            
+            .input-field {
+                margin-bottom: 0;
+                display: flex;
+                flex-direction: row;
+                display: flex;
+                margin: 0 0 1rem 0;
+            }
+            
+        }
+        
+        .image-gallery {
+            width: 100%;
+            padding: 10px;
+            background-color: var(--color-tertiary);
+            border-radius: 4px;
+            box-shadow: 1px 1px 2px 0 #000000 inset;
+            /* grid-auto-flow: row dense; */
+            grid: repeat(auto-fit, 2fr) / auto-flow 2fr;
+            /* grid-template-columns: repeat(var(--grid-cols), 1fr); */
+            /* grid-template-rows: repeat(var(--grid-rows), 1fr); */
+            overflow-y: scroll;
+            transition: all 0.3s cubic-bezier(.645, .045, .355, 1);
+            display: grid;
+            grid-gap: 10px;
+            grid-template-columns: repeat(auto-fit, minmax(var(--image-height), 0%));
+            grid-template-rows: repeat(auto-fill, minmax(var(--image-width), 0%));
+        }
+        
+        .image-gallery .img-container {
+            vertical-align: middle;
+            margin: 0;
+            border-radius: 4px;
+            display: flex;
+            flex-wrap: nowrap;
+            flex-direction: column;
+            align-items: stretch;
+            justify-content: space-evenly;
+            align-content: center;
+            aspect-ratio: 1;
+            box-shadow: 0 0 10px -2px #000000;
+            background-color: var(--color-quaternary);
+            /* max-width: 100%; */
+            /* max-height: 50%; */
+            /* min-height: var(--image-height); */
+            /* min-width: var(--image-width); */
+            height: var(--image-height);
+            width: var(--image-width);
+        }
+
+        /*
+        img {
+            width: 100%;
+            height: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+        }
+        
+        .img-container {
+            grid-row: span 2 / auto;
+            grid-column: span 2 / auto;
+        }
+        
+        .img-container.img-image-full {
+            grid-column: span 4/ auto;
+        }
+        
+        .image-gallery>* {
+            background-color: green;
+            height: var(--image-height);
+            width: var(--image-width);
+        }
+        */
+
+        .image-gallery .img-container img {
+            display: flex;
+            justify-content: center;
+            align-content: center;
+            align-items: center;
+            flex-grow: 1;
+            /* width: 100%; */
+            /* height: 100%; */
+        }
+        
+        .image-gallery .img-container .img-url {
+            display: flex;
+            flex-wrap: nowrap;
+            flex-direction: row;
+            align-content: stretch;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .image-gallery .img-container .img-url .button {
+            flex: 0 0 2%;
+            width: 10px;
+            height: 100%;
+            margin: 0;
+            padding: 2px 20px;
+        }
+        
+        .image-gallery .img-container .img-url input[type="text"] {
+            font-size: 12px;
+            padding: 4px 10px;
+            overflow-wrap: break-word;
+            white-space: pre-wrap;
+            height: 100%;
+            width: 100%;
+            margin: 0px;
+        }
+        
+        .input-fields {
+            display: flex;
+            flex-wrap: wrap;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+            padding: 4px;
+        }
+        
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            flex-wrap: nowrap;
+            align-content: center;
+            justify-content: space-between;
+        }
+
+        .input-fields label {
+            margin-bottom: 0px;
+            padding: 1px;
+            margin: 0px;
+            margin-right: 4px;
+            width: 30%;
+            word-break: unset;
+            word-wrap: unset;
+            overflow-wrap: unset;
+            -webkit-hyphens: unset;
+            -moz-hyphens: unset;
+            -ms-hyphens: unset;
+            hyphens: unset;
+            word-break: keep-all;
+        }
+        
+        .input-fields input[type="number"],
+        .input-fields input[type="text"],
+        .input-fields textarea {
+            width: 70%;
+            height: 100%;
+            flex: 1;
+            margin: 0px;
+            padding: 0.0rem;
+            box-sizing: border-box;
+            justify-content: space-between;
+            font-size: 0.65em;
+            border: 1px solid #151515;
+            border-radius: 1px;
+        }
+        
+        .input-field {
+            margin-bottom: 0;
+            display: flex;
+            flex-direction: row;
+            display: flex;
+            margin: 0 0 0rem 0;
+        }
+        
+        input[type="number"],
+        input[type="text"],
+        textarea {
+            width: 100%;
+            box-sizing: border-box;
+            border: 1px solid #242424;
+            border-radius: 4px;
+            font-size: 16px;
+            padding: 12px 20px;
+            margin: 0;
+        }
+        
+        input[type="number"] {
+            width: auto;
+            box-sizing: border-box;
+            border: 1px solid #242424;
+            border-radius: 4px;
+            font-size: 16px;
+            padding: 12px 20px;
+            margin: 0;
+        }
+        
+        input[type="submit"] {
+            width: 100%;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 16px;
+            padding: 14px 20px;
+            margin: 0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+        
+        select {
+            width: 100%;
+            box-sizing: border-box;
+            border: 1px solid #242424;
+            border-radius: 4px;
+            font-size: 16px;
+            padding: 12px 20px;
+            margin: 0;
+        }
+        
+        input[type="radio"] {
+            margin: 0 10px 0 0;
+        }
+        
+        input[type="checkbox"] {
+            margin: 0 10px 0 0;
+        }
+        
+    /* Button Styling */
+    
+    button.button {
+        font-family: var(--font-family);
+        background: var(--color-primary-button);
+        color: var(--color-secondary-button);
+        border-radius: var(--button-border-radius);
+        border: var(--button-border-width) solid transparent;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgb(21, 21, 21);
+        border: none;
+        color: #444;
+        cursor: pointer;
+        padding: 4px 10px;
+        font-size: var(--font-size-button);
+        font-weight: 700;
+        outline: none;
+        text-align: center;
+        transition: 0.05s ease-in-out;
+        box-shadow: 1px 1px 1px -1px rgba(0, 0, 0, 0.5), -1px -1px 1px -1px rgba(120, 120, 120, 0.5);
+    }
+    button.button::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        opacity: 0;
+        display: block;
+        box-shadow: 2px 2px 2px -1px rgba(82, 79, 79, 0.5) inset, -1px -1px 1px -1px rgba(120, 120, 120, 0.5) inset;
+        transition: box-shadow 0.05s;
+    }
+    button.button:hover {
+        background-color: var(--color-quinary);
+        color: white;
+    }
+    button.button:hover::after {
+        box-shadow: inset 1px 1px 1px -1px rgba(0, 0, 0, 0.5), inset -1px -1px 1px -1px rgba(120, 120, 120, 0.5);
+    }
+
+    button.button:active {
+        box-shadow: inset 1px 1px 1px -1px rgba(0, 0, 0, 0.5), inset -1px -1px 1px -1px rgba(120, 120, 120, 0.5);
+    }
+
+        .api-key {
+            margin-bottom: 20px;
+        }
+        
+        input {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            align-content: center;
+            width: 100%;
+        }
+        
+        label {
+            display: flex;
+            flex-shrink: 1;
+            width: auto;
+        }
+        
+        .input-text {
+            display: flex;
+            resize: vertical;
+            overflow: auto;
+        }
+        
+        textarea {
+            resize: vertical;
+            overflow: auto;
+        }
+        
+        .input-number {
+            display: flex;
+            flex-shrink: 1;
+            width: 20px;
+        }
+        
+         ::-webkit-scrollbar-track {
+            width: var(--slider-width);
+            height: var(--slider-width);
+            box-shadow: inset 0 0 1px 1px #222222;
+            background-color: var(--color-primary);
+        }
+        /* Handle */
+        
+         ::-webkit-scrollbar-thumb {
+            background: #373737;
+            background-color: var(--color-secondary-button);
+            box-shadow:  0 0 2px 1px #222222;
+            border-radius: 0;
+        }
+        /* Handle on hover */
+        
+         ::-webkit-scrollbar-thumb:hover {
+            width: var(--slider-width) !important;
+            background-color: var(--color-quinary);
+        }
+        
+        .tabs-container::-webkit-scrollbar {
+            background: #0000;
+            display: none;
+            width: 0;
+        }
+        
+         ::-webkit-scrollbar {
+            width: var(--slider-width);
+            height: var(--slider-width);
+        }
+        
+
+        /* SPINNER */
+        /* Absolute Center Spinner */
+        .loading {
+            position: fixed;
+            z-index: 999;
+            height: 2em;
+            width: 2em;
+            overflow: show;
+            margin: auto;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+        }
+  
+        /* Transparent Overlay */
+        .loading:before {
+            content: '';
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.3);
+          }
+  
+        .spinner.spinner7 {
+            position: relative;
+        }
+        .spinner.spinner7::before, .spinner.spinner7::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            transform: translate(-50%, -50%) scale(0);
+        }
+        .spinner.spinner7::before {
+            background: #fff;
+            -webkit-animation: pulse2 2s ease-in-out infinite;
+                animation: pulse2 2s ease-in-out infinite;
+        }
+        .spinner.spinner7::after {
+            background: #fff;
+            -webkit-animation: pulse2 2s 1s ease-in-out infinite;
+                animation: pulse2 2s 1s ease-in-out infinite;
+        }
+        </style>
+    </head>
+
+    <body>
+        <div class="container">
+            <div id='header' class='header'>
+
+                <div class="input-fields">
+                    <div class="input-group">
+                        <div class="input-field input-text">
+                            <label for="text-prompt">API Key</label>
+                            <input type="text" id="api-key"
+                                placeholder="Enter your API key">
+                        </div>
+                        <div class="input-field input-text">
+                            <label for="text-prompt">Prompt</label>
+                            <textarea type="text" id="text-prompt"
+                                placeholder="Enter your text prompt"></textarea>
+                        </div>
+                        <div class="input-field">
+                            <label for="image-count">#</label>
+                            <input type="number" id="image-count" min="1"
+                                max="20" value="2">
+                        </div>
+                    </div>
+                </div>
+                <div class="input-field">
+                    <button id="submit-btn"
+                        class="button button-submit">Generate</button>
+                </div>
+            </div>
+
+            <div class='content'>
+
+                <div id="image-gallery" class="image-gallery">
+                    <!-- Images will be dynamically added here -->
+                </div>
+
+            </div>
+        </div>
+        <script>
+        // The API endpoint for image generation
+        const apiKeyDefault = '';
+        const apiUrl = 'https://api.openai.com/';
+        const apiEndpoint = 'v1/images/generations';
+        var imageSize = '1024';
+        var numImages;
+        var imagePrompt;
+        var apiKeyInput;
+        var selectedImgId = 0;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document
+                .getElementById('api-key')
+                .value = apiKeyDefault;
+            document
+                .getElementById('submit-btn')
+                .addEventListener('click', generateImages);
+            document
+                .getElementById('image-count')
+                .addEventListener('input', updateGalleryPlaceholders);
+
+            updateGalleryPlaceholders();
+        });
+
+        function setActiveImage(img) {
+            if (selectedImgId === img) selectedImgId = 0;
+            if (img) selectedImgId = img;
+            console.log(selectedImgId);
+        }
+
+        function updateGalleryPlaceholders(num) {
+
+            const imageCount = document
+                .getElementById('image-count')
+                .value;
+            const imageGallery = document.getElementById('image-gallery');
+
+            // Clear previous images
+            imageGallery.innerHTML = '';
+
+            // Generate new image placeholders.
+            for (var i = 0; i < imageCount; i++) {
+                const img = document.createElement('div');
+                // const img = document.createElement('img');
+                const imgId = `img-${i}-image`;
+                img.innerHTML = `
+                            <img src='' id='img-${i}-image' class='${imgId === selectedImgId ? 'img-image-full' : 'img-image'}' /> 
+                            <div id='img-${i}-url' class='img-url'>
+                                <input type="text" id="img-${i}-url-text" class='img-url-text' placeholder="{GENERATED IMAGE URL}">
+                                <input type='button' class='button button-copy'></input>
+                                <input type='button' class='button button-generate'></input>
+                            </div>
+                        `;
+                img.id = 'img-' + i;
+                img.classList.add('img-container');
+                img.addEventListener("click", () => {
+                    if (selectedImgId === img) selectedImgId = 0;
+                    if (img) selectedImgId = img;
+                    console.log(selectedImgId);
+                    // setActiveImage(imgId);
+                    img.classList.toggle('img-image-full');
+                });
+                imageGallery.appendChild(img);
+            }
+
+        }
+
+        async function generateImages() {
+            const apiKey = document.getElementById('api-key').value;
+            const textPrompt = document.getElementById('text-prompt').value;
+            const imageCount = document.getElementById('image-count').value;
+            const imageGallery = document.getElementById('image-gallery');
+
+            // Updoot the image gallery placeholders in case it's uninitialized or
+            // something.
+            updateGalleryPlaceholders();
+
+            // Make API call to DALL-E
+            var apiAddress = apiUrl + apiEndpoint;
+            console.log(apiAddress, textPrompt, apiKey, imageCount);
+            try {
+                const response = await fetch(apiAddress, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        'model': 'dall-e-2',
+                        'user': 'amugus',
+                        'prompt': textPrompt,
+                        'n': Number(imageCount),
+                        'size': `${imageSize}x${imageSize}`
+                    })
+                });
+                console.log('response: ', response);
+
+                if ( response.status ) {
+                    console.log( "Status: ", response.status );
+                    let status = response.status;
+                    if ( status !== 200 ) {
+                        // Encountered an error. Alert user.
+                        alert(
+                            "Response status " + status + "\n\n" + "Message: " + response.statusText
+                        );
+                    }
+                }
+
+                const imgData = await response.json();
+                const data = imgData.data;
+                console.log(data);
+
+                // Update images in the image gallery
+
+                // We have the results now, so populate the image gallery with the urls and some
+                // bells and whistles (copy url field, download button, etc)
+                if (data) {
+                    if (data.hasOwnProperty(length)) {
+                        // Update images in the image gallery
+                        for (var i = 0; i < data.length; i++) {
+                            // Fetch the data object at this index.
+                            const obj = data[i];
+                            // console.log(obj);
+                            const imgContainerID = `img-${i}`;
+                            const imgImageID = `img-${i}-image`;
+                            // const imgUrlID          = `img-${i}-url`;
+                            const imgUrlTextID = `img-${i}-url-text`;
+
+                            // Fetch the corresponding image element. This will have already been generated.
+                            const imgContainer = document.getElementById(imgContainerID);
+                            const imgImage = document.getElementById(imgImageID);
+                            // const imgUrl = document.getElementById(imgUrlID);
+                            const imgUrlText = document.getElementById(imgUrlTextID);
+
+                            // Set the img src to the provided url.
+                            imgImage.src = obj.url;
+                            imgUrlText.value = obj.url;
+
+                            // Also add a url text field so the raw text can be copied. Create a
+                            // "re-generate this image" button LATER LOL
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert(error);
+                // Handle error appropriately
+            }
+        }
+    </script>
+    </body>
+
+</html>
